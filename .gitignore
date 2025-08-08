@@ -25,7 +25,7 @@ pids/
 coverage/
 
 # Uploads
-uploads/*
+uploads/*   
 !uploads/.gitkeep
 
 # IDE
