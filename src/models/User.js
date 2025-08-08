@@ -204,6 +204,74 @@ class User {
     // return usersWithStats;
     return usersWithStats.filter((user) => user.totalLength > 0);
   }
+  // Uncomment if you need to implement usersLogs method for Dev mode
+  // static async usersLogs() {
+  //   const db = getConnection();
+
+  //   const [rows] = await db.execute(`
+  //     SELECT 
+  //       u.id,
+  //       u.name,
+  //       al.activity_data
+  //     FROM users u
+  //     LEFT JOIN activity_logs al ON u.id = al.user_id
+  //     WHERE u.role != 'admin'
+  //     GROUP BY u.id, u.name
+  //   `);
+  //   const today = new Date().toISOString().slice(0, 10);
+  //   const usersWithStats = rows.map((user) => {
+  //     // let totalActiveHours = 0;
+  //     let totalActiveMinutes = 0;
+  //     let formattedActiveTime = "";
+  //     let activities = [];
+  //     // let screenshotLogs = [];
+
+  //     try {
+  //       activities = JSON.parse(user.activity_data || "[]");
+
+  //       // // Only count logs with screenshots
+  //       // screenshotLogs = activities.filter((log) => log.screenshotName);
+
+  //       // ✅ Filter only today's screenshot logs
+
+  //       const screenshotLogsToday = activities.filter((log) => {
+  //         if (!log.timestamp || !log.screenshotName) return false;
+
+  //         const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
+
+  //         return logDate === today;
+  //       });
+
+  //       // const totalActiveMinutes = screenshotLogs.length * 10;
+  //       totalActiveMinutes = screenshotLogsToday.length * 10;
+
+  //       if (totalActiveMinutes < 60) {
+  //         formattedActiveTime = `${totalActiveMinutes} min`;
+  //       } else {
+  //         const hours = Math.floor(totalActiveMinutes / 60);
+  //         const minutes = totalActiveMinutes % 60;
+  //         formattedActiveTime =
+  //           minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
+  //       }
+  //     } catch (err) {
+  //       console.error(`Failed to parse activity_data for user ${user.id}`, err);
+  //     }
+
+  //     return {
+  //       id: user.id,
+  //       name: user.name,
+  //       activeStatus: [...connectedUsers.values()].includes(user.id),
+  //       totalActiveHours: formattedActiveTime,
+  //     };
+  //   });
+  //   usersWithStats.sort((a, b) => {
+  //     if (a.activeStatus === b.activeStatus) return 0;
+  //     return a.activeStatus ? -1 : 1; 
+  //   });
+  //   return usersWithStats;
+  //   // Only return users with screenshots
+  //   // return usersWithStats.filter((user) => user.totalActiveHours !== "0 min");
+  // }
 
   static async usersLogs() {
     const db = getConnection();
@@ -212,37 +280,29 @@ class User {
       SELECT 
         u.id,
         u.name,
-        al.activity_data
+        JSON_ARRAYAGG(al.activity_data) AS activity_data
       FROM users u
       LEFT JOIN activity_logs al ON u.id = al.user_id
       WHERE u.role != 'admin'
       GROUP BY u.id, u.name
     `);
+
     const today = new Date().toISOString().slice(0, 10);
+
     const usersWithStats = rows.map((user) => {
-      // let totalActiveHours = 0;
       let totalActiveMinutes = 0;
       let formattedActiveTime = "";
       let activities = [];
-      // let screenshotLogs = [];
 
       try {
-        activities = JSON.parse(user.activity_data || "[]");
-
-        // // Only count logs with screenshots
-        // screenshotLogs = activities.filter((log) => log.screenshotName);
-
-        // ✅ Filter only today's screenshot logs
+        activities = JSON.parse(user.activity_data || "[]").flat();
 
         const screenshotLogsToday = activities.filter((log) => {
           if (!log.timestamp || !log.screenshotName) return false;
-
           const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
-
           return logDate === today;
         });
 
-        // const totalActiveMinutes = screenshotLogs.length * 10;
         totalActiveMinutes = screenshotLogsToday.length * 10;
 
         if (totalActiveMinutes < 60) {
@@ -264,13 +324,13 @@ class User {
         totalActiveHours: formattedActiveTime,
       };
     });
+
     usersWithStats.sort((a, b) => {
       if (a.activeStatus === b.activeStatus) return 0;
-      return a.activeStatus ? -1 : 1; 
+      return a.activeStatus ? -1 : 1;
     });
+
     return usersWithStats;
-    // Only return users with screenshots
-    // return usersWithStats.filter((user) => user.totalActiveHours !== "0 min");
   }
 
   static async getUserProfile(id) {
