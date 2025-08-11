@@ -141,7 +141,7 @@ class User {
       let filteredLogs = [];
       let statusColor;
       try {
-        activities = JSON.parse(user.activity_data || "[]");
+        activities = user.activity_data || [];
 
         filteredLogs = date
           ? activities.filter((log) => {
