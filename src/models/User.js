@@ -360,7 +360,7 @@ class User {
     return usersWithStats.filter((user) => user.totalLength > 0);
   }
 
-
+  
   // static async usersLogs() {
   //   const db = getConnection();
 
@@ -421,6 +421,7 @@ class User {
   //   return usersWithStats;
   // }
 
+
   static async usersLogs() {
     const db = getConnection();
 
@@ -443,14 +444,57 @@ class User {
       let activities = [];
 
       try {
-        // Remove JSON.parse() since activity_data is already an array
-        activities = (user.activity_data || []).filter(log => log !== null).flat();
+        let rawData = user.activity_data;
+        
+        // Handle different possible data formats
+        if (rawData === null || rawData === undefined) {
+          activities = [];
+        } else if (typeof rawData === 'string') {
+          // If it's a string, try to parse it
+          try {
+            activities = JSON.parse(rawData);
+          } catch (parseError) {
+            console.log(`String parse failed for user ${user.id}, treating as empty array`);
+            activities = [];
+          }
+        } else if (Array.isArray(rawData)) {
+          // If it's already an array, use it directly
+          activities = rawData;
+        } else {
+          // If it's an object, wrap it in an array
+          activities = [rawData];
+        }
+
+        // Ensure activities is an array and filter out nulls
+        if (!Array.isArray(activities)) {
+          activities = [];
+        }
+        
+        // Filter out null/undefined entries and flatten if needed
+        activities = activities.filter(log => log !== null && log !== undefined);
+        
+        // If activities contains nested arrays, flatten them
+        if (activities.some(item => Array.isArray(item))) {
+          activities = activities.flat();
+        }
+
+        console.log(`User ${user.id} - Activities processed:`, activities.length); // Debug log
 
         const screenshotLogsToday = activities.filter((log) => {
-          if (!log || !log.timestamp || !log.screenshotName) return false;
-          const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
-          return logDate === today;
+          if (!log || typeof log !== 'object' || !log.timestamp || !log.screenshotName) {
+            return false;
+          }
+          
+          try {
+            const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
+            return logDate === today;
+          } catch (dateError) {
+            console.log(`Date parsing failed for log:`, log.timestamp);
+            return false;
+          }
         });
+
+        console.log(`User ${user.id} - Screenshot logs today:`, screenshotLogsToday.length); // Debug log
 
         totalActiveMinutes = screenshotLogsToday.length * 10;
 
@@ -463,7 +507,9 @@ class User {
             minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
         }
       } catch (err) {
-        console.error(`Failed to parse activity_data for user ${user.id}`, err);
+        console.error(`Failed to process activity_data for user ${user.id}`, err);
+        console.error(`Raw data type:`, typeof user.activity_data);
+        console.error(`Raw data:`, user.activity_data);
       }
 
       return {
@@ -481,6 +527,7 @@ class User {
 
     return usersWithStats;
   }
+
   
   static async getUserProfile(id) {
     const db = getConnection();
