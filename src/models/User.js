@@ -51,7 +51,7 @@ class User {
       SELECT 
         u.id,
         u.name,
-        al.activity_data
+        GROUP_CONCAT(al.activity_data) AS activity_data
       FROM users u
       LEFT JOIN activity_logs al ON u.id = al.user_id
       WHERE u.role != 'admin'
@@ -125,7 +125,7 @@ class User {
       SELECT 
         u.id,
         u.name,
-        al.activity_data
+        GROUP_CONCAT(al.activity_data) AS activity_data
       FROM users u
       LEFT JOIN activity_logs al ON u.id = al.user_id
       WHERE u.role != 'admin'
@@ -212,7 +212,7 @@ class User {
       SELECT 
         u.id,
         u.name,
-        al.activity_data
+        GROUP_CONCAT(al.activity_data) AS activity_data
       FROM users u
       LEFT JOIN activity_logs al ON u.id = al.user_id
       WHERE u.role != 'admin'
