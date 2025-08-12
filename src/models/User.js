@@ -51,7 +51,7 @@ class User {
       SELECT 
         u.id,
         u.name,
-        ANY_VALUE(al.activity_data) as activity_data
+        al.activity_data
       FROM users u
       LEFT JOIN activity_logs al ON u.id = al.user_id
       WHERE u.role != 'admin'
@@ -125,7 +125,7 @@ class User {
       SELECT 
         u.id,
         u.name,
-        ANY_VALUE(al.activity_data) as activity_data
+        al.activity_data
       FROM users u
       LEFT JOIN activity_logs al ON u.id = al.user_id
       WHERE u.role != 'admin'
@@ -212,7 +212,7 @@ class User {
       SELECT 
         u.id,
         u.name,
-        ANY_VALUE(al.activity_data) as activity_data
+        al.activity_data
       FROM users u
       LEFT JOIN activity_logs al ON u.id = al.user_id
       WHERE u.role != 'admin'
