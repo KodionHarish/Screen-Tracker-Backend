@@ -98,7 +98,8 @@ class ActivityService {
     const allLogs = [];
 
     activities.forEach((row) => {
-      const activityArray = JSON.parse(row.activity_data || "[]");
+      const activityArray = row.activity_data || "[]";
+      // const activityArray = JSON.parse(row.activity_data || "[]");
 
       activityArray.forEach((activity) => {
         allLogs.push({
