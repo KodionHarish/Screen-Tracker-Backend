@@ -118,170 +118,14 @@ class User {
     return usersWithStats;
   }
 
-  // static async usersWithLogs(date) {
-  //   const db = getConnection();
-  //   //const [rows] = await db.execute("SELECT id, name FROM users WHERE role != 'admin'");
-  //   const [rows] = await db.execute(`
-  //     SELECT 
-  //       u.id,
-  //       u.name,
-  //       JSON_ARRAYAGG(al.activity_data) AS activity_data
-  //     FROM users u
-  //     LEFT JOIN activity_logs al ON u.id = al.user_id
-  //     WHERE u.role != 'admin'
-  //     GROUP BY u.id, u.name
-  // `);
-
-  //   const usersWithStats = rows.map((user) => {
-  //     let totalActiveHours = 0;
-  //     let lastScreenshotTime = null;
-  //     let screenshotLogs = [];
-  //     let formattedActiveTime = "";
-  //     let activities = [];
-  //     let filteredLogs = [];
-  //     let statusColor;
-  //     try {
-  //       activities = JSON.parse(user.activity_data || "[]");
-
-  //       filteredLogs = date
-  //         ? activities.filter((log) => {
-  //             if (!log.timestamp) return false;
-  //             const logDate = new Date(log.timestamp)
-  //               .toISOString()
-  //               .slice(0, 10);
-  //             return logDate === date;
-  //           })
-  //         : [];
-
-  //       screenshotLogs = filteredLogs.filter((log) => log.screenshotName);
-  //       if (screenshotLogs.length < 24) {
-  //         statusColor = "red";
-  //       } else if (screenshotLogs.length >= 24 && screenshotLogs.length <= 36) {
-  //         statusColor = "yellow";
-  //       } else {
-  //         statusColor = "green";
-  //       }
-
-  //       const totalActiveMinutes = screenshotLogs.length * 10;
-
-  //       if (totalActiveMinutes < 60) {
-  //         formattedActiveTime = `${totalActiveMinutes} min`;
-  //       } else {
-  //         const hours = Math.floor(totalActiveMinutes / 60);
-  //         const minutes = totalActiveMinutes % 60;
-  //         formattedActiveTime =
-  //           minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
-  //       }
-
-  //       if (screenshotLogs.length > 0) {
-  //         const latestLog = screenshotLogs.reduce((a, b) =>
-  //           new Date(a.timestamp) > new Date(b.timestamp) ? a : b
-  //         );
-  //         const date = new Date(latestLog.timestamp);
-  //         let hours = date.getHours();
-  //         const minutes = String(date.getMinutes()).padStart(2, "0");
-  //         const ampm = hours >= 12 ? "PM" : "AM";
-  //         hours = hours % 12;
-  //         hours = hours ? hours : 12; // Convert 0 to 12
-  //         const hourStr = String(hours).padStart(2, "0");
-  //         lastScreenshotTime = `${hourStr}:${minutes} ${ampm}`;
-  //       }
-  //     } catch (err) {
-  //       console.error(`Failed to parse activity_data for user ${user.id}`, err);
-  //     }
-  //     return {
-  //       id: user.id,
-  //       name: user.name,
-  //       totalActiveHours: formattedActiveTime,
-  //       lastScreenshotTime,
-  //       totalLength: screenshotLogs.length,
-  //       activity_data: filteredLogs,
-  //       statusColor,
-  //       activeStatus: [...connectedUsers.values()].includes(user.id),
-  //     };
-  //   });
-
-  //   // return usersWithStats;
-  //   return usersWithStats.filter((user) => user.totalLength > 0);
-  // }
-  // Uncomment if you need to implement usersLogs method for Dev mode
-  // static async usersLogs() {
-  //   const db = getConnection();
-
-  //   const [rows] = await db.execute(`
-  //     SELECT 
-  //       u.id,
-  //       u.name,
-  //       al.activity_data
-  //     FROM users u
-  //     LEFT JOIN activity_logs al ON u.id = al.user_id
-  //     WHERE u.role != 'admin'
-  //     GROUP BY u.id, u.name
-  //   `);
-  //   const today = new Date().toISOString().slice(0, 10);
-  //   const usersWithStats = rows.map((user) => {
-  //     // let totalActiveHours = 0;
-  //     let totalActiveMinutes = 0;
-  //     let formattedActiveTime = "";
-  //     let activities = [];
-  //     // let screenshotLogs = [];
-
-  //     try {
-  //       activities = JSON.parse(user.activity_data || "[]");
-
-  //       // // Only count logs with screenshots
-  //       // screenshotLogs = activities.filter((log) => log.screenshotName);
-
-  //       // ✅ Filter only today's screenshot logs
-
-  //       const screenshotLogsToday = activities.filter((log) => {
-  //         if (!log.timestamp || !log.screenshotName) return false;
-
-  //         const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
-
-  //         return logDate === today;
-  //       });
-
-  //       // const totalActiveMinutes = screenshotLogs.length * 10;
-  //       totalActiveMinutes = screenshotLogsToday.length * 10;
-
-  //       if (totalActiveMinutes < 60) {
-  //         formattedActiveTime = `${totalActiveMinutes} min`;
-  //       } else {
-  //         const hours = Math.floor(totalActiveMinutes / 60);
-  //         const minutes = totalActiveMinutes % 60;
-  //         formattedActiveTime =
-  //           minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
-  //       }
-  //     } catch (err) {
-  //       console.error(`Failed to parse activity_data for user ${user.id}`, err);
-  //     }
-
-  //     return {
-  //       id: user.id,
-  //       name: user.name,
-  //       activeStatus: [...connectedUsers.values()].includes(user.id),
-  //       totalActiveHours: formattedActiveTime,
-  //     };
-  //   });
-  //   usersWithStats.sort((a, b) => {
-  //     if (a.activeStatus === b.activeStatus) return 0;
-  //     return a.activeStatus ? -1 : 1; 
-  //   });
-  //   return usersWithStats;
-  //   // Only return users with screenshots
-  //   // return usersWithStats.filter((user) => user.totalActiveHours !== "0 min");
-  // }
-
-
-      static async usersWithLogs(date) {
+  static async usersWithLogs(date) {
     const db = getConnection();
     //const [rows] = await db.execute("SELECT id, name FROM users WHERE role != 'admin'");
     const [rows] = await db.execute(`
       SELECT 
         u.id,
         u.name,
-        JSON_ARRAYAGG(al.activity_data) AS activity_data
+        al.activity_data
       FROM users u
       LEFT JOIN activity_logs al ON u.id = al.user_id
       WHERE u.role != 'admin'
@@ -297,18 +141,19 @@ class User {
       let filteredLogs = [];
       let statusColor;
       try {
-        activities = user.activity_data || [];
+        activities = JSON.parse(user.activity_data || "[]");
 
         filteredLogs = date
           ? activities.filter((log) => {
-              if (!log || !log.timestamp) return false;
-              // Convert timestamp to UTC date for comparison
-              const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
+              if (!log.timestamp) return false;
+              const logDate = new Date(log.timestamp)
+                .toISOString()
+                .slice(0, 10);
               return logDate === date;
             })
           : [];
 
-        screenshotLogs = filteredLogs.filter((log) => log && log.screenshotName);
+        screenshotLogs = filteredLogs.filter((log) => log.screenshotName);
         if (screenshotLogs.length < 24) {
           statusColor = "red";
         } else if (screenshotLogs.length >= 24 && screenshotLogs.length <= 36) {
@@ -359,8 +204,75 @@ class User {
     // return usersWithStats;
     return usersWithStats.filter((user) => user.totalLength > 0);
   }
+  // Uncomment if you need to implement usersLogs method for Dev mode
+  static async usersLogs() {
+    const db = getConnection();
 
-  
+    const [rows] = await db.execute(`
+      SELECT 
+        u.id,
+        u.name,
+        al.activity_data
+      FROM users u
+      LEFT JOIN activity_logs al ON u.id = al.user_id
+      WHERE u.role != 'admin'
+      GROUP BY u.id, u.name
+    `);
+    const today = new Date().toISOString().slice(0, 10);
+    const usersWithStats = rows.map((user) => {
+      // let totalActiveHours = 0;
+      let totalActiveMinutes = 0;
+      let formattedActiveTime = "";
+      let activities = [];
+      // let screenshotLogs = [];
+
+      try {
+        activities = JSON.parse(user.activity_data || "[]");
+
+        // // Only count logs with screenshots
+        // screenshotLogs = activities.filter((log) => log.screenshotName);
+
+        // ✅ Filter only today's screenshot logs
+
+        const screenshotLogsToday = activities.filter((log) => {
+          if (!log.timestamp || !log.screenshotName) return false;
+
+          const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
+
+          return logDate === today;
+        });
+
+        // const totalActiveMinutes = screenshotLogs.length * 10;
+        totalActiveMinutes = screenshotLogsToday.length * 10;
+
+        if (totalActiveMinutes < 60) {
+          formattedActiveTime = `${totalActiveMinutes} min`;
+        } else {
+          const hours = Math.floor(totalActiveMinutes / 60);
+          const minutes = totalActiveMinutes % 60;
+          formattedActiveTime =
+            minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
+        }
+      } catch (err) {
+        console.error(`Failed to parse activity_data for user ${user.id}`, err);
+      }
+
+      return {
+        id: user.id,
+        name: user.name,
+        activeStatus: [...connectedUsers.values()].includes(user.id),
+        totalActiveHours: formattedActiveTime,
+      };
+    });
+    usersWithStats.sort((a, b) => {
+      if (a.activeStatus === b.activeStatus) return 0;
+      return a.activeStatus ? -1 : 1; 
+    });
+    return usersWithStats;
+    // Only return users with screenshots
+    // return usersWithStats.filter((user) => user.totalActiveHours !== "0 min");
+  }
+
   // static async usersLogs() {
   //   const db = getConnection();
 
@@ -421,114 +333,6 @@ class User {
   //   return usersWithStats;
   // }
 
-
-  static async usersLogs() {
-    const db = getConnection();
-
-    const [rows] = await db.execute(`
-      SELECT 
-        u.id,
-        u.name,
-        JSON_ARRAYAGG(al.activity_data) AS activity_data
-      FROM users u
-      LEFT JOIN activity_logs al ON u.id = al.user_id
-      WHERE u.role != 'admin'
-      GROUP BY u.id, u.name
-    `);
-
-    const today = new Date().toISOString().slice(0, 10);
-
-    const usersWithStats = rows.map((user) => {
-      let totalActiveMinutes = 0;
-      let formattedActiveTime = "";
-      let activities = [];
-
-      try {
-        let rawData = user.activity_data;
-        
-        // Handle different possible data formats
-        if (rawData === null || rawData === undefined) {
-          activities = [];
-        } else if (typeof rawData === 'string') {
-          // If it's a string, try to parse it
-          try {
-            activities = JSON.parse(rawData);
-          } catch (parseError) {
-            console.log(`String parse failed for user ${user.id}, treating as empty array`);
-            activities = [];
-          }
-        } else if (Array.isArray(rawData)) {
-          // If it's already an array, use it directly
-          activities = rawData;
-        } else {
-          // If it's an object, wrap it in an array
-          activities = [rawData];
-        }
-
-        // Ensure activities is an array and filter out nulls
-        if (!Array.isArray(activities)) {
-          activities = [];
-        }
-        
-        // Filter out null/undefined entries and flatten if needed
-        activities = activities.filter(log => log !== null && log !== undefined);
-        
-        // If activities contains nested arrays, flatten them
-        if (activities.some(item => Array.isArray(item))) {
-          activities = activities.flat();
-        }
-
-        console.log(`User ${user.id} - Activities processed:`, activities.length); // Debug log
-
-        const screenshotLogsToday = activities.filter((log) => {
-          if (!log || typeof log !== 'object' || !log.timestamp || !log.screenshotName) {
-            return false;
-          }
-          
-          try {
-            const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
-            return logDate === today;
-          } catch (dateError) {
-            console.log(`Date parsing failed for log:`, log.timestamp);
-            return false;
-          }
-        });
-
-        console.log(`User ${user.id} - Screenshot logs today:`, screenshotLogsToday.length); // Debug log
-
-        totalActiveMinutes = screenshotLogsToday.length * 10;
-
-        if (totalActiveMinutes < 60) {
-          formattedActiveTime = `${totalActiveMinutes} min`;
-        } else {
-          const hours = Math.floor(totalActiveMinutes / 60);
-          const minutes = totalActiveMinutes % 60;
-          formattedActiveTime =
-            minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
-        }
-      } catch (err) {
-        console.error(`Failed to process activity_data for user ${user.id}`, err);
-        console.error(`Raw data type:`, typeof user.activity_data);
-        console.error(`Raw data:`, user.activity_data);
-      }
-
-      return {
-        id: user.id,
-        name: user.name,
-        activeStatus: [...connectedUsers.values()].includes(user.id),
-        totalActiveHours: formattedActiveTime,
-      };
-    });
-
-    usersWithStats.sort((a, b) => {
-      if (a.activeStatus === b.activeStatus) return 0;
-      return a.activeStatus ? -1 : 1;
-    });
-
-    return usersWithStats;
-  }
-
-  
   static async getUserProfile(id) {
     const db = getConnection();
     const [rows] = await db.execute(

@@ -95,11 +95,10 @@ class ActivityService {
 
   static async getAllActivities() {
     const activities = await Activity.getAllActivities();
-    const allLogs = []; 
+    const allLogs = [];
 
     activities.forEach((row) => {
-      // const activityArray = JSON.parse(row.activity_data || "[]");
-      const activityArray = row.activity_data || "[]";
+      const activityArray = JSON.parse(row.activity_data || "[]");
 
       activityArray.forEach((activity) => {
         allLogs.push({
