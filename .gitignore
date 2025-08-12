@@ -34,7 +34,7 @@ uploads/*
 *.swp
 *.swo
 
-# OS
+# OS 
 .DS_Store
 Thumbs.db
 EOF
