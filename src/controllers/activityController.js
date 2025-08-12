@@ -111,7 +111,7 @@ class ActivityController {
       totalMouseClicks: Object.values(parsedMouseClickDetails).reduce((sum, count) => sum + count, 0),
       dominantClickType: getDominantClickType(parsedMouseClickDetails),
     };
-
+ 
     await ActivityService.logActivity(userId, activityData);
     const io = req.app.get("io");
    

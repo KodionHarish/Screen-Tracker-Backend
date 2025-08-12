@@ -64,8 +64,8 @@ class User {
       let screenshotLogs = [];
       let formattedActiveTime = "";
       try {
-        const activities = JSON.parse(user.activity_data || "[]");
-
+        const activities = user.activity_data || "[]";
+        // const activities = JSON.parse(user.activity_data || "[]");
         const filteredLogs = date
           ? activities.filter((log) => {
               if (!log.timestamp) return false;
@@ -141,8 +141,8 @@ class User {
       let filteredLogs = [];
       let statusColor;
       try {
-        activities = JSON.parse(user.activity_data || "[]");
-
+        // activities = JSON.parse(user.activity_data || "[]");
+        activities = user.activity_data || "[]";
         filteredLogs = date
           ? activities.filter((log) => {
               if (!log.timestamp) return false;
@@ -227,8 +227,8 @@ class User {
       // let screenshotLogs = [];
 
       try {
-        activities = JSON.parse(user.activity_data || "[]");
-
+        activities = user.activity_data || "[]";
+        // activities = JSON.parse(user.activity_data || "[]");
         // // Only count logs with screenshots
         // screenshotLogs = activities.filter((log) => log.screenshotName);
 
