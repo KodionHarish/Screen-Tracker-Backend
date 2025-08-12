@@ -9,7 +9,8 @@ class ActivityService {
     if (!existingActivity) {
       await Activity.createActivityLog(userId, [activityData]);
     } else {
-      const currentActivities = JSON.parse(existingActivity.activity_data);
+      const currentActivities = existingActivity.activity_data;
+      // const currentActivities = JSON.parse(existingActivity.activity_data);
       currentActivities.push(activityData);
       await Activity.updateActivityLog(userId, currentActivities);
     }

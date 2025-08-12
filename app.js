@@ -32,7 +32,7 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Serve static files
-app.use("/uploads", express.static(uploadsDir));
+app.use("/uploads", express.static(uploadsDir));  
 
 // Import routes
 const authRoutes = require("./src/routes/auth");
