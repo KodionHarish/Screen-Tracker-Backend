@@ -118,93 +118,185 @@ class User {
     return usersWithStats;
   }
 
+  // static async usersWithLogs(date) {
+  //   const db = getConnection();
+  //   //const [rows] = await db.execute("SELECT id, name FROM users WHERE role != 'admin'");
+  //   const [rows] = await db.execute(`
+  //     SELECT 
+  //       u.id,
+  //       u.name,
+  //       GROUP_CONCAT(al.activity_data) AS activity_data
+  //     FROM users u
+  //     LEFT JOIN activity_logs al ON u.id = al.user_id
+  //     WHERE u.role != 'admin'
+  //     GROUP BY u.id, u.name
+  // `);
+
+  //   const usersWithStats = rows.map((user) => {
+  //     let totalActiveHours = 0;
+  //     let lastScreenshotTime = null;
+  //     let screenshotLogs = [];
+  //     let formattedActiveTime = "";
+  //     let activities = [];
+  //     let filteredLogs = [];
+  //     let statusColor;
+  //     try {
+  //       // activities = JSON.parse(user.activity_data || "[]");
+  //       activities = user.activity_data || "[]";
+  //       filteredLogs = date
+  //         ? activities.filter((log) => {
+  //             if (!log.timestamp) return false;
+  //             const logDate = new Date(log.timestamp)
+  //               .toISOString()
+  //               .slice(0, 10);
+  //             return logDate === date;
+  //           })
+  //         : [];
+
+  //       screenshotLogs = filteredLogs.filter((log) => log.screenshotName);
+  //       if (screenshotLogs.length < 24) {
+  //         statusColor = "red";
+  //       } else if (screenshotLogs.length >= 24 && screenshotLogs.length <= 36) {
+  //         statusColor = "yellow";
+  //       } else {
+  //         statusColor = "green";
+  //       }
+
+  //       const totalActiveMinutes = screenshotLogs.length * 10;
+
+  //       if (totalActiveMinutes < 60) {
+  //         formattedActiveTime = `${totalActiveMinutes} min`;
+  //       } else {
+  //         const hours = Math.floor(totalActiveMinutes / 60);
+  //         const minutes = totalActiveMinutes % 60;
+  //         formattedActiveTime =
+  //           minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
+  //       }
+
+  //       if (screenshotLogs.length > 0) {
+  //         const latestLog = screenshotLogs.reduce((a, b) =>
+  //           new Date(a.timestamp) > new Date(b.timestamp) ? a : b
+  //         );
+  //         const date = new Date(latestLog.timestamp);
+  //         let hours = date.getHours();
+  //         const minutes = String(date.getMinutes()).padStart(2, "0");
+  //         const ampm = hours >= 12 ? "PM" : "AM";
+  //         hours = hours % 12;
+  //         hours = hours ? hours : 12; // Convert 0 to 12
+  //         const hourStr = String(hours).padStart(2, "0");
+  //         lastScreenshotTime = `${hourStr}:${minutes} ${ampm}`;
+  //       }
+  //     } catch (err) {
+  //       console.error(`Failed to parse activity_data for user ${user.id}`, err);
+  //     }
+  //     return {
+  //       id: user.id,
+  //       name: user.name,
+  //       totalActiveHours: formattedActiveTime,
+  //       lastScreenshotTime,
+  //       totalLength: screenshotLogs.length,
+  //       activity_data: filteredLogs,
+  //       statusColor,
+  //       activeStatus: [...connectedUsers.values()].includes(user.id),
+  //     };
+  //   });
+
+  //   // return usersWithStats;
+  //   return usersWithStats.filter((user) => user.totalLength > 0);
+  // }
+  // Uncomment if you need to implement usersLogs method for Dev mode
+  
   static async usersWithLogs(date) {
-    const db = getConnection();
-    //const [rows] = await db.execute("SELECT id, name FROM users WHERE role != 'admin'");
-    const [rows] = await db.execute(`
-      SELECT 
-        u.id,
-        u.name,
-        GROUP_CONCAT(al.activity_data) AS activity_data
-      FROM users u
-      LEFT JOIN activity_logs al ON u.id = al.user_id
-      WHERE u.role != 'admin'
-      GROUP BY u.id, u.name
+  const db = getConnection();
+
+  const [rows] = await db.execute(`
+    SELECT u.id AS userId, u.name, al.activity_data
+    FROM users u
+    LEFT JOIN activity_logs al 
+      ON u.id = al.user_id
+    WHERE u.role != 'admin'
   `);
 
-    const usersWithStats = rows.map((user) => {
-      let totalActiveHours = 0;
-      let lastScreenshotTime = null;
-      let screenshotLogs = [];
-      let formattedActiveTime = "";
-      let activities = [];
-      let filteredLogs = [];
-      let statusColor;
+  const usersMap = {};
+
+  rows.forEach(row => {
+    if (!usersMap[row.userId]) {
+      usersMap[row.userId] = {
+        id: row.userId,
+        name: row.name,
+        activity_data: []
+      };
+    }
+
+    if (row.activity_data) {
       try {
-        activities = JSON.parse(user.activity_data || "[]");
-        // activities = user.activity_data || "[]";
-        filteredLogs = date
-          ? activities.filter((log) => {
-              if (!log.timestamp) return false;
-              const logDate = new Date(log.timestamp)
-                .toISOString()
-                .slice(0, 10);
-              return logDate === date;
-            })
-          : [];
-
-        screenshotLogs = filteredLogs.filter((log) => log.screenshotName);
-        if (screenshotLogs.length < 24) {
-          statusColor = "red";
-        } else if (screenshotLogs.length >= 24 && screenshotLogs.length <= 36) {
-          statusColor = "yellow";
-        } else {
-          statusColor = "green";
-        }
-
-        const totalActiveMinutes = screenshotLogs.length * 10;
-
-        if (totalActiveMinutes < 60) {
-          formattedActiveTime = `${totalActiveMinutes} min`;
-        } else {
-          const hours = Math.floor(totalActiveMinutes / 60);
-          const minutes = totalActiveMinutes % 60;
-          formattedActiveTime =
-            minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
-        }
-
-        if (screenshotLogs.length > 0) {
-          const latestLog = screenshotLogs.reduce((a, b) =>
-            new Date(a.timestamp) > new Date(b.timestamp) ? a : b
-          );
-          const date = new Date(latestLog.timestamp);
-          let hours = date.getHours();
-          const minutes = String(date.getMinutes()).padStart(2, "0");
-          const ampm = hours >= 12 ? "PM" : "AM";
-          hours = hours % 12;
-          hours = hours ? hours : 12; // Convert 0 to 12
-          const hourStr = String(hours).padStart(2, "0");
-          lastScreenshotTime = `${hourStr}:${minutes} ${ampm}`;
+        const parsed = JSON.parse(row.activity_data);
+        if (Array.isArray(parsed)) {
+          usersMap[row.userId].activity_data.push(...parsed);
         }
       } catch (err) {
-        console.error(`Failed to parse activity_data for user ${user.id}`, err);
+        console.error(`Invalid JSON for user ${row.userId}`, err.message);
       }
-      return {
-        id: user.id,
-        name: user.name,
-        totalActiveHours: formattedActiveTime,
-        lastScreenshotTime,
-        totalLength: screenshotLogs.length,
-        activity_data: filteredLogs,
-        statusColor,
-        activeStatus: [...connectedUsers.values()].includes(user.id),
-      };
-    });
+    }
+  });
 
-    // return usersWithStats;
-    return usersWithStats.filter((user) => user.totalLength > 0);
-  }
-  // Uncomment if you need to implement usersLogs method for Dev mode
+  // Now apply your filtering and stats logic
+  return Object.values(usersMap).map(user => {
+    const filteredLogs = date
+      ? user.activity_data.filter(log => {
+          if (!log.timestamp) return false;
+          const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
+          return logDate === date;
+        })
+      : [];
+
+    const screenshotLogs = filteredLogs.filter(log => log.screenshotName);
+    const totalActiveMinutes = screenshotLogs.length * 10;
+
+    let formattedActiveTime;
+    if (totalActiveMinutes < 60) {
+      formattedActiveTime = `${totalActiveMinutes} min`;
+    } else {
+      const hours = Math.floor(totalActiveMinutes / 60);
+      const minutes = totalActiveMinutes % 60;
+      formattedActiveTime = minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
+    }
+
+    let lastScreenshotTime = null;
+    if (screenshotLogs.length > 0) {
+      const latestLog = screenshotLogs.reduce((a, b) =>
+        new Date(a.timestamp) > new Date(b.timestamp) ? a : b
+      );
+      const dateObj = new Date(latestLog.timestamp);
+      let hours = dateObj.getHours();
+      const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12;
+      lastScreenshotTime = `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
+    }
+
+    let statusColor;
+    if (screenshotLogs.length < 24) {
+      statusColor = "red";
+    } else if (screenshotLogs.length <= 36) {
+      statusColor = "yellow";
+    } else {
+      statusColor = "green";
+    }
+
+    return {
+      ...user,
+      totalActiveHours: formattedActiveTime,
+      lastScreenshotTime,
+      totalLength: screenshotLogs.length,
+      activity_data: filteredLogs,
+      statusColor,
+      activeStatus: [...connectedUsers.values()].includes(user.id)
+    };
+  }).filter(user => user.totalLength > 0);
+}
+
+
   static async usersLogs() {
     const db = getConnection();
 
