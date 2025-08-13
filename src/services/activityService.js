@@ -52,6 +52,7 @@ class ActivityService {
       return { logs: [], total: 0 };
     }
 
+    // let activities = JSON.parse(activityRecord.activity_data || "[]");
     let activities = JSON.parse(activityRecord.activity_data || "[]");
 
     if (filterDate) {
@@ -129,7 +130,8 @@ class ActivityService {
         let logs = [];
         
         try {
-          logs = JSON.parse(row.activity_data || "[]");
+          // logs = JSON.parse(row.activity_data || "[]");
+          logs = row.activity_data || "[]";
         } catch (parseError) {
           console.error(`Invalid JSON for user ${userId}:`, parseError);
           continue; // Skip this user if JSON is invalid
@@ -146,7 +148,8 @@ class ActivityService {
         if (deletedCount > 0) {
           await db.execute(
             "UPDATE activity_logs SET activity_data = ? WHERE user_id = ?",
-            [JSON.stringify(filteredLogs), userId]
+            // [JSON.stringify(filteredLogs), userId]
+            [filteredLogs, userId]
           );
           totalDeleted += deletedCount;
           console.log(`Deleted ${deletedCount} old logs for user ${userId}`);
