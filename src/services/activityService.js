@@ -17,6 +17,7 @@ class ActivityService {
   }
 
   static async deleteScreenshot(userId, id) {
+    console.log(userId,id,'console')
     const activityRecord = await Activity.findByUserId(userId);
 
     if (!activityRecord) {
@@ -26,7 +27,7 @@ class ActivityService {
     let activities = [];
 
     try {
-      activities = JSON.parse(activityRecord.activity_data || "[]");
+      activities = activityRecord.activity_data || "[]";
     } catch (error) {
       console.error("Invalid JSON in activity_data");
       return false;
@@ -37,7 +38,8 @@ class ActivityService {
     const db = getConnection();
     const [result] = await db.execute(
       "UPDATE activity_logs SET activity_data = ? WHERE user_id = ?",
-      [JSON.stringify(filteredActivities), userId]
+      // [JSON.stringify(filteredActivities), userId]
+      [filteredActivities, userId]
     );
 
     return result.affectedRows > 0;
@@ -161,8 +163,6 @@ class ActivityService {
 }
 
 module.exports = ActivityService;
-
-
 
 
 // // src/services/activityService.js
