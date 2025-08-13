@@ -206,7 +206,7 @@ class User {
   // }
   // Uncomment if you need to implement usersLogs method for Dev mode
   
-  static async usersWithLogs(date) {
+static async usersWithLogs(date) {
   const db = getConnection();
 
   const [rows] = await db.execute(`
@@ -230,7 +230,12 @@ class User {
 
     if (row.activity_data) {
       try {
-        const parsed = JSON.parse(row.activity_data);
+        // Handle both string and already-parsed JSON
+        const parsed =
+          typeof row.activity_data === "string"
+            ? JSON.parse(row.activity_data)
+            : row.activity_data;
+
         if (Array.isArray(parsed)) {
           usersMap[row.userId].activity_data.push(...parsed);
         }
@@ -241,60 +246,68 @@ class User {
   });
 
   // Now apply your filtering and stats logic
-  return Object.values(usersMap).map(user => {
-    const filteredLogs = date
-      ? user.activity_data.filter(log => {
-          if (!log.timestamp) return false;
-          const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
-          return logDate === date;
-        })
-      : [];
+  return Object.values(usersMap)
+    .map(user => {
+      const filteredLogs = date
+        ? user.activity_data.filter(log => {
+            if (!log.timestamp) return false;
+            const logDate = new Date(log.timestamp)
+              .toISOString()
+              .slice(0, 10);
+            return logDate === date;
+          })
+        : [];
 
-    const screenshotLogs = filteredLogs.filter(log => log.screenshotName);
-    const totalActiveMinutes = screenshotLogs.length * 10;
-
-    let formattedActiveTime;
-    if (totalActiveMinutes < 60) {
-      formattedActiveTime = `${totalActiveMinutes} min`;
-    } else {
-      const hours = Math.floor(totalActiveMinutes / 60);
-      const minutes = totalActiveMinutes % 60;
-      formattedActiveTime = minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
-    }
-
-    let lastScreenshotTime = null;
-    if (screenshotLogs.length > 0) {
-      const latestLog = screenshotLogs.reduce((a, b) =>
-        new Date(a.timestamp) > new Date(b.timestamp) ? a : b
+      const screenshotLogs = filteredLogs.filter(
+        log => log.screenshotName || log.screenshotUrl
       );
-      const dateObj = new Date(latestLog.timestamp);
-      let hours = dateObj.getHours();
-      const minutes = String(dateObj.getMinutes()).padStart(2, "0");
-      const ampm = hours >= 12 ? "PM" : "AM";
-      hours = hours % 12 || 12;
-      lastScreenshotTime = `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
-    }
+      const totalActiveMinutes = screenshotLogs.length * 10;
 
-    let statusColor;
-    if (screenshotLogs.length < 24) {
-      statusColor = "red";
-    } else if (screenshotLogs.length <= 36) {
-      statusColor = "yellow";
-    } else {
-      statusColor = "green";
-    }
+      let formattedActiveTime;
+      if (totalActiveMinutes < 60) {
+        formattedActiveTime = `${totalActiveMinutes} min`;
+      } else {
+        const hours = Math.floor(totalActiveMinutes / 60);
+        const minutes = totalActiveMinutes % 60;
+        formattedActiveTime =
+          minutes > 0 ? `${hours} hr ${minutes} min` : `${hours}:00 hr`;
+      }
 
-    return {
-      ...user,
-      totalActiveHours: formattedActiveTime,
-      lastScreenshotTime,
-      totalLength: screenshotLogs.length,
-      activity_data: filteredLogs,
-      statusColor,
-      activeStatus: [...connectedUsers.values()].includes(user.id)
-    };
-  }).filter(user => user.totalLength > 0);
+      let lastScreenshotTime = null;
+      if (screenshotLogs.length > 0) {
+        const latestLog = screenshotLogs.reduce((a, b) =>
+          new Date(a.timestamp) > new Date(b.timestamp) ? a : b
+        );
+        const dateObj = new Date(latestLog.timestamp);
+        let hours = dateObj.getHours();
+        const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12;
+        lastScreenshotTime = `${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
+      }
+
+      let statusColor;
+      if (screenshotLogs.length < 24) {
+        statusColor = "red";
+      } else if (screenshotLogs.length <= 36) {
+        statusColor = "yellow";
+      } else {
+        statusColor = "green";
+      }
+
+      return {
+        ...user,
+        totalActiveHours: formattedActiveTime,
+        lastScreenshotTime,
+        totalLength: screenshotLogs.length,
+        activity_data: filteredLogs,
+        statusColor,
+        activeStatus: [...connectedUsers.values()].includes(user.id)
+      };
+    })
+    .filter(user => user.totalLength > 0);
 }
+
 
 
   static async usersLogs() {
