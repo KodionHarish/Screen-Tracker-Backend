@@ -130,8 +130,8 @@ class ActivityService {
         let logs = [];
         
         try {
-          // logs = JSON.parse(row.activity_data || "[]");
-          logs = row.activity_data || "[]";
+          logs = JSON.parse(row.activity_data || "[]");
+          // logs = row.activity_data || "[]";
         } catch (parseError) {
           console.error(`Invalid JSON for user ${userId}:`, parseError);
           continue; // Skip this user if JSON is invalid
