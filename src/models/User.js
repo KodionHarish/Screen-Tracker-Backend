@@ -125,7 +125,7 @@ class User {
       SELECT 
         u.id,
         u.name,
-        GROUP_CONCAT(al.activity_data) AS activity_data
+        GROUP_CONCAT(al.activity_data SEPARATOR '||') AS activity_data
       FROM users u
       LEFT JOIN activity_logs al ON u.id = al.user_id
       WHERE u.role != 'admin'
@@ -141,8 +141,8 @@ class User {
       let filteredLogs = [];
       let statusColor;
       try {
-        // activities = JSON.parse(user.activity_data || "[]");
-        activities = user.activity_data || "[]";
+        activities = JSON.parse(user.activity_data || "[]");
+        // activities = user.activity_data || "[]";
         filteredLogs = date
           ? activities.filter((log) => {
               if (!log.timestamp) return false;
