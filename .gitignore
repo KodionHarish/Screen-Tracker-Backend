@@ -25,7 +25,7 @@ pids/
 coverage/
 
 # Uploads
-uploads/*   
+uploads/*
 !uploads/.gitkeep
 
 # IDE
@@ -34,7 +34,7 @@ uploads/*
 *.swp
 *.swo
 
-# OS 
+# OS
 .DS_Store
 Thumbs.db
 EOF
