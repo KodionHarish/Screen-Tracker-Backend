@@ -340,7 +340,8 @@ static async usersLogs() {
     if (row.activity_data) {
       try {
         // Parse JSON string into an array
-        const parsed = JSON.parse(row.activity_data);
+        // const parsed = JSON.parse(row.activity_data);
+        const parsed = row.activity_data;
         if (Array.isArray(parsed)) {
           userMap.get(row.id).activities.push(...parsed);
         }
