@@ -13,7 +13,7 @@ const { initSocket } = require("./src/utils/initSocket");
 
 const app = express();
 
-// Middleware setup
+// Middleware setups
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
