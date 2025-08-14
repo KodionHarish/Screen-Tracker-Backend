@@ -77,7 +77,7 @@ class User {
           : activities;
 
         //  console.log(activities,'aaaaaaaaactiviurss')
-        screenshotLogs = filteredLogs.filter((log) => log.screenshotName);
+        screenshotLogs = filteredLogs.filter((log) => log.screenshotName || log.screenshotUrl);
         // Each screenshot represents 10 minutes => convert to hours
         const totalActiveMinutes = screenshotLogs.length * 10;
 
@@ -312,7 +312,6 @@ static async usersWithLogs(date) {
 static async usersLogs() {
   const db = getConnection();
 
-  // Get raw logs for each user (no GROUP_CONCAT — safer to merge in JS)
   const [rows] = await db.execute(`
     SELECT 
       u.id,
@@ -358,7 +357,7 @@ static async usersLogs() {
 
     // Filter only today's screenshot logs
     const screenshotLogsToday = user.activities.filter((log) => {
-      if (!log.timestamp || !log.screenshotName) return false;
+      if (!log.timestamp || !log.screenshotUrl) return false;
       const logDate = new Date(log.timestamp).toISOString().slice(0, 10);
       return logDate === today;
     });
