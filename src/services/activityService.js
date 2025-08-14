@@ -63,7 +63,7 @@ class ActivityService {
       });
     }
 
-    const screenshotLogs = activities.filter((log) => log.screenshotName);
+    const screenshotLogs = activities.filter((log) => log.screenshotName || log.screenshotUrl);
 
     // Each screenshot represents 10 minutes => convert to hours
     const totalActiveMinutes = screenshotLogs.length * 10;
