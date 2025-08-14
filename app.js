@@ -15,11 +15,11 @@ const app = express();
 
 // Middleware setups
 app.use(express.json());
-app.use(cookieParser());
+app.use(cookieParser()); 
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "https://admin-panel-screen-tracker.vercel.app",
+    origin:"https://admin-panel-screen-tracker.vercel.app",
     credentials: true,
   })
 );
