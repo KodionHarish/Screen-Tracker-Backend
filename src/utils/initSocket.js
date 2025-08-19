@@ -28,7 +28,14 @@ function initSocket(server) {
     // Handle user connection with userId from query params
     const userId = parseInt(socket.handshake.query.userId);
     console.log(`👤 User attempting to connect: ${userId}`);
-
+    const userType = socket.handshake.query.role;
+  
+    // Handle admin dashboard connections separately
+    if (userType === 'admin') {
+      socket.join('admin-room');
+      console.log(`👨‍💼 Admin dashboard connected: ${socket.id}`);
+      return; // Don't treat this as a user connection
+    }
     if (userId && !isNaN(userId)) {
       // Join user-specific room
       socket.join(`user-${userId}`);

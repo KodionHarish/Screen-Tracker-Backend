@@ -302,7 +302,7 @@ static async usersWithLogs(date) {
         lastScreenshotTime,
         totalLength: screenshotLogs.length,
         activity_data: filteredLogs,
-        statusColor,
+        statusColor,  
         activeStatus: [...connectedUsers.values()].includes(user.id)
       };
     })
