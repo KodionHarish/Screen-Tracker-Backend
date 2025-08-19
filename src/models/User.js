@@ -278,8 +278,9 @@ static async usersWithLogs(date) {
           const latestLog = screenshotLogs.reduce((a, b) =>
             new Date(a.timestamp) > new Date(b.timestamp) ? a : b
           );
-          // const dateObj = new Date(latestLog.timestamp);
-          const dateObj = new Date(latestLog.timestamp + '+05:30');
+          const dateObj = new Date(latestLog.timestamp);
+          console.log('Raw timestamp:', latestLog.timestamp);
+          console.log('Parsed date:', dateObj);
           let hours = dateObj.getHours();
           const minutes = String(dateObj.getMinutes()).padStart(2, "0");
           const ampm = hours >= 12 ? "PM" : "AM";
