@@ -28,7 +28,7 @@ function initSocket(server) {
     // Handle user connection with userId from query params
     const userId = parseInt(socket.handshake.query.userId);
     console.log(`👤 User attempting to connect: ${userId}`);
-    const userType = socket.handshake.query.role;
+    const userType = socket.handshake.query.userType;
   
     // Handle admin dashboard connections separately
     if (userType === 'admin') {
@@ -427,7 +427,7 @@ function initSocket(server) {
       }
     }
   });
-  
+
     // Handle ping/pong for connection health
     socket.on('ping', () => {
       socket.emit('pong');
